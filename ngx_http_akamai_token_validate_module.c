@@ -13,7 +13,7 @@ typedef struct {
     ngx_str_t 	key;
     ngx_array_t* filename_prefixes;
     ngx_str_t	strip_token;
-    ngx_str_t   ip;
+    ngx_http_complex_value_t* ip;
 } ngx_http_akamai_token_validate_loc_conf_t;
 
 enum {
