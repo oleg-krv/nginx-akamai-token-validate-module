@@ -13,6 +13,7 @@ typedef struct {
 	ngx_str_t 	key;
 	ngx_array_t* filename_prefixes;
 	ngx_str_t	strip_token;
+    ngx_str_t   ip;
 } ngx_http_akamai_token_validate_loc_conf_t;
 
 enum {
@@ -80,7 +81,14 @@ static ngx_command_t  ngx_http_akamai_token_validate_commands[] = {
 	offsetof(ngx_http_akamai_token_validate_loc_conf_t, strip_token),
 	NULL },
 
-	ngx_null_command
+    { ngx_string("akamai_token_validate_str_ip"),
+    NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+    ngx_conf_set_hex_str_slot,
+    NGX_HTTP_LOC_CONF_OFFSET,
+    offsetof(ngx_http_akamai_token_validate_loc_conf_t, str_ip),
+    NULL },
+
+    ngx_null_command
 };
 
 
@@ -363,7 +371,11 @@ ngx_http_akamai_token_validate(ngx_http_request_t *r, ngx_str_t* token, ngx_str_
 	// validate the ip
 	if (parsed_token.ip.len != 0)
 	{
-		addr_text = &r->connection->addr_text;
+        if (conf->ip.len != 0) {
+            addr_text = &conf->ip;
+        } else {
+            addr_text = &r->connection->addr_text;
+        }
 		if (parsed_token.ip.len != addr_text->len ||
 			ngx_memcmp(parsed_token.ip.data, addr_text->data, parsed_token.ip.len) != 0)
 		{
