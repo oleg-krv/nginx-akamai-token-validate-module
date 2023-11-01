@@ -277,6 +277,7 @@ ngx_http_akamai_token_validate(ngx_http_request_t *r, ngx_str_t* token, ngx_str_
 #endif
     HMAC_CTX* hmac;
     ngx_http_akamai_token_validate_loc_conf_t  *conf;
+    ngx_str_t ip;
 
     if (!ngx_http_akamai_token_validate_parse(token, &parsed_token))
     {
@@ -373,8 +374,12 @@ ngx_http_akamai_token_validate(ngx_http_request_t *r, ngx_str_t* token, ngx_str_
     if (parsed_token.ip.len != 0)
     {
         conf = ngx_http_get_module_loc_conf(r, ngx_http_akamai_token_validate_module);
-        if (conf->ip.len != 0) {
-            addr_text = &conf->ip;
+        if (ngx_http_complex_value(r, conf->ip, &ip) != NGX_OK)
+        {
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+        if (ip.len != 0) {
+            addr_text = &ip;
         } else {
             addr_text = &r->connection->addr_text;
         }
